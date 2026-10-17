@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#090e22">
+<title>Flying Shadow: Mage Quest</title>
+<style>
+:root{--cyan:#68f2ff;--gold:#ffd36a;--panel:rgba(12,19,44,.94)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d20;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none;user-select:none}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 0%,#27386a 0%,#101833 50%,#070b18 100%);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;min-height:48px;gap:8px;z-index:2}
+.brand{font-weight:900;letter-spacing:.04em;font-size:clamp(13px,3.4vw,20px);line-height:1.1}.brand span{color:var(--cyan)}
+#hud{display:none;align-items:center;gap:9px;font-size:12px;font-weight:800}
+.pill{background:#101a38;border:1px solid #526da8;border-radius:999px;padding:6px 9px;white-space:nowrap}
+#gameWrap{position:relative;flex:1;min-height:0;margin:0 7px;border:1px solid #425b91;border-radius:14px;overflow:hidden;background:#101a35;box-shadow:0 0 30px #0008}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#menu,#overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(180deg,#080e22d9,#090e22f2);padding:20px;z-index:4}
+#overlay{display:none}
+.panel{width:min(100%,390px);padding:24px 20px;border:1px solid #5876b6;border-radius:22px;background:var(--panel);box-shadow:0 18px 60px #0008}
+h1{font-size:clamp(27px,7vw,44px);line-height:1.02;margin:0 0 8px;font-weight:1000;letter-spacing:-.04em}h1 em{font-style:normal;color:var(--cyan)}.subtitle{color:#bdcbed;margin:0 0 20px;font-size:14px}
+button{font:inherit;font-weight:850;border:1px solid #718ac3;border-radius:14px;background:#1a2850;color:#fff;padding:12px 14px;cursor:pointer;touch-action:manipulation}
+button:active{transform:scale(.97)}button.primary{background:linear-gradient(135deg,#66eaff,#8b9dff);color:#081127;border:0}
+.menuBtns{display:grid;grid-template-columns:1fr 1fr;gap:9px}.menuBtns .primary{grid-column:1/-1}
+.small{font-size:12px;color:#b8c7e8;line-height:1.45;margin-top:14px}
+#controls{display:none;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));min-height:94px}
+.pad{display:flex;gap:10px}.control{width:clamp(54px,15vw,76px);height:clamp(54px,15vw,76px);border-radius:20px;background:#15254bd9;border:1px solid #7798db;color:#fff;font-size:25px;box-shadow:0 5px 0 #080f25;touch-action:none}
+.control.jump{background:#16465b;border-color:#6af1ff}.control.magic{font-size:20px;background:#45295f;border-color:#d9a2ff}
+#pause{font-size:15px;width:45px;height:45px;border-radius:50%;padding:0}
+#hint{font-size:10px;color:#aabbe2;text-align:center;padding:0 8px 4px}
+@media(min-width:760px){#app{max-width:1000px;margin:auto;left:0;right:0}#controls{min-height:88px}}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div class="brand">FLYING SHADOW <span>✦ MAGE QUEST</span></div><div id="hud"><div class="pill" id="level">FASE 1</div><div class="pill" id="lives">♥ ♥ ♥</div><div class="pill" id="score">✧ 0</div><button id="pause">Ⅱ</button></div></header>
+<div id="gameWrap">
+<canvas id="game" aria-label="Jogo de plataforma Flying Shadow"></canvas>
+<div id="menu"><div class="panel"><h1>FLYING SHADOW<br><em>MAGE QUEST</em></h1><p class="subtitle">Uma aventura mágica começa nas sombras.</p><div class="menuBtns"><button class="primary" id="play">JOGAR</button><button id="continue">CONTINUAR</button><button id="how">COMO JOGAR</button><button id="settings">ÁUDIO: LIGADO</button></div><p class="small" id="menuInfo">Explore ruínas, colete cristais e encontre o portal.</p></div></div>
+<div id="overlay"><div class="panel"><h1 id="overTitle">PAUSADO</h1><p class="subtitle" id="overText">Respire. A aventura espera.</p><div class="menuBtns" id="overButtons"></div></div></div>
+</div>
+<div id="controls"><div class="pad"><button class="control" data-key="left" aria-label="Mover para esquerda">◀</button><button class="control" data-key="right" aria-label="Mover para direita">▶</button></div><div class="pad"><button class="control magic" data-key="magic" aria-label="Magia">✦</button><button class="control jump" data-key="jump" aria-label="Pular">⬆</button></div></div>
+<div id="hint">◀ ▶ MOVER · ⬆ PULAR · ✦ MAGIA · Encontre o portal!</div>
+</div>
+<script>
+(()=>{'use strict';
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),wrap=document.getElementById('gameWrap');
+const menu=document.getElementById('menu'),overlay=document.getElementById('overlay'),controls=document.getElementById('controls'),hud=document.getElementById('hud');
+const $=id=>document.getElementById(id);
+let W=800,H=450,dpr=1,mode='menu',level=1,score=0,lives=3,crystals=0,muted=false,high=0,unlocked=1,lastLevel=1;
+try{high=+(localStorage.getItem('fsmq_high')||0);unlocked=+(localStorage.getItem('fsmq_unlocked')||1);lastLevel=+(localStorage.getItem('fsmq_last')||1);muted=localStorage.getItem('fsmq_muted')==='1'}catch(e){}
+const input={left:false,right:false,jump:false,magic:false};let jumpQueued=false,magicQueued=false,player,camera=0,worldWidth=2100,platforms=[],moving=[],gems=[],enemies=[],hazards=[],portal,particles=[],lastTime=0,raf=0,audioCtx=null;
+function save(){try{localStorage.setItem('fsmq_high',high);localStorage.setItem('fsmq_unlocked',unlocked);localStorage.setItem('fsmq_last',lastLevel);localStorage.setItem('fsmq_muted',muted?'1':'0')}catch(e){}}
+function resize(){const r=wrap.getBoundingClientRect();dpr=Math.min(window.devicePixelRatio||1,1.7);W=Math.max(320,r.width);H=Math.max(250,r.height);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
+window.addEventListener('resize',resize);new ResizeObserver(resize).observe(wrap);resize();
+function sound(freq=500,duration=.08,type='sine'){if(muted)return;try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(.08,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}catch(e){}}
+function build(n){level=n;worldWidth=2050+(n-1)*240;platforms=[{x:0,y:H*.83,w:330,h:90},{x:390,y:H*.72,w:150,h:22},{x:600,y:H*.61,w:155,h:22},{x:820,y:H*.75,w:175,h:22},{x:1055,y:H*.62,w:145,h:22},{x:1260,y:H*.73,w:190,h:22},{x:1510,y:H*.60,w:150,h:22},{x:1740,y:H*.78,w:worldWidth-1740,h:100}];
+if(n>=2){platforms.splice(3,0,{x:770,y:H*.49,w:115,h:20});platforms.splice(6,0,{x:1190,y:H*.48,w:120,h:20})}
+if(n>=3){platforms.splice(2,0,{x:565,y:H*.43,w:105,h:20});platforms.splice(7,0,{x:1370,y:H*.42,w:110,h:20})}
+moving=[{x:340,y:H*.57,w:100,h:18,baseY:H*.57,phase:0},{x:970,y:H*.48,w:100,h:18,baseY:H*.48,phase:2}];
+gems=[];for(let i=0;i<10+n*2;i++){let p=platforms[(i*2+1)%platforms.length];gems.push({x:p.x+30+(i%3)*27,y:p.y-27,got:false,phase:i})}
+enemies=[];for(let i=0;i<4+n;i++){let p=platforms[(i*3+2)%platforms.length];enemies.push({x:p.x+25,y:p.y-28,w:25,h:28,min:p.x+5,max:p.x+p.w-30,v:(i%2?1:-1)*(45+n*8),alive:true})}
+hazards=[];for(let i=0;i<3+n;i++){let x=470+i*300;hazards.push({x,y:H*.81,w:36,h:20})}
+portal={x:worldWidth-100,y:H*.78-60,w:46,h:60};
+player={x:45,y:H*.5,w:26,h:36,vx:0,vy:0,onGround:false,invuln:0,magicCooldown:0};camera=0;particles=[];lastLevel=n;save();updateHud();}
+function updateHud(){$('level').textContent='FASE '+level;$('lives').textContent='♥ '.repeat(Math.max(0,lives))+'♡ '.repeat(Math.max(0,3-lives));$('score').textContent='✧ '+score}
+function start(n=1){score=n===1?0:score;lives=3;crystals=0;build(n);mode='playing';menu.style.display='none';overlay.style.display='none';controls.style.display='flex';hud.style.display='flex';$('hint').textContent='◀ ▶ MOVER · ⬆ PULAR · ✦ MAGIA · Encontre o portal!';input.left=input.right=input.jump=input.magic=false;jumpQueued=magicQueued=false;lastTime=0;if(!raf)raf=requestAnimationFrame(loop)}
+function showMenu(){mode='menu';overlay.style.display='none';menu.style.display='flex';controls.style.display='none';hud.style.display='none';$('continue').style.display=unlocked>1?'block':'none';$('settings').textContent='ÁUDIO: '+(muted?'DESLIGADO':'LIGADO');}
+function showOverlay(title,desc,buttons){mode='overlay';overlay.style.display='flex';$('overTitle').textContent=title;$('overText').textContent=desc;const box=$('overButtons');box.innerHTML='';buttons.forEach(b=>{const el=document.createElement('button');el.textContent=b.label;if(b.primary)el.className='primary';el.onclick=b.action;box.appendChild(el)});Object.keys(input).forEach(k=>input[k]=false)}
+function pause(){if(mode==='playing')showOverlay('PAUSADO','A aventura espera por você.',[{label:'CONTINUAR',primary:true,action:()=>{mode='playing';overlay.style.display='none';lastTime=0}},{label:'REINICIAR FASE',action:()=>start(level)},{label:'MENU PRINCIPAL',action:showMenu}])}
+$('play').onclick=()=>start(1);$('continue').onclick=()=>start(Math.min(unlocked,lastLevel));$('pause').onclick=pause;
+$('how').onclick=()=>showOverlay('COMO JOGAR','Use ◀ e ▶ para caminhar. ⬆ pula. ✦ lança magia para afastar inimigos próximos. Colete cristais e chegue ao portal brilhante.',[{label:'ENTENDI',primary:true,action:showMenu}]);
+$('settings').onclick=()=>{muted=!muted;save();$('settings').textContent='ÁUDIO: '+(muted?'DESLIGADO':'LIGADO');sound(600)};
+function bindButton(el,key){const down=e=>{e.preventDefault();try{el.setPointerCapture(e.pointerId)}catch(_){}if(key==='jump'){if(!input.jump)jumpQueued=true;input.jump=true}else if(key==='magic'){if(!input.magic)magicQueued=true;input.magic=true}else input[key]=true;sound(320,.025)};const up=e=>{e.preventDefault();input[key]=false};el.addEventListener('pointerdown',down);['pointerup','pointercancel','lostpointercapture'].forEach(ev=>el.addEventListener(ev,up))}
+document.querySelectorAll('[data-key]').forEach(el=>bindButton(el,el.dataset.key));
+window.addEventListener('blur',()=>{Object.keys(input).forEach(k=>input[k]=false);if(mode==='playing')pause()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&mode==='playing')pause()});
+window.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp',' ','a','d','w','A','D','W','x','X'].includes(e.key))e.preventDefault();if((e.key==='ArrowLeft'||e.key==='a'||e.key==='A')&&!e.repeat)input.left=true;if((e.key==='ArrowRight'||e.key==='d'||e.key==='D')&&!e.repeat)input.right=true;if((e.key==='ArrowUp'||e.key===' '||e.key==='w'||e.key==='W')&&!e.repeat){input.jump=true;jumpQueued=true}if((e.key==='x'||e.key==='X')&&!e.repeat){input.magic=true;magicQueued=true}if(e.key==='Escape')pause()});
+window.addEventListener('keyup',e=>{if(['ArrowLeft','a','A'].includes(e.key))input.left=false;if(['ArrowRight','d','D'].includes(e.key))input.right=false;if(['ArrowUp',' ','w','W'].includes(e.key))input.jump=false;if(['x','X'].includes(e.key))input.magic=false});
+function overlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+function burst(x,y,color,count=8){for(let i=0;i<count&&particles.length<90;i++)particles.push({x,y,vx:(Math.random()-.5)*180,vy:(Math.random()-.7)*180,life:.45+Math.random()*.4,color})}
+function hurt(){if(player.invuln>0)return;lives--;player.invuln=1.3;player.vy=-280;player.vx=player.x<camera+W/2?180:-180;sound(120,.2,'sawtooth');burst(player.x+player.w/2,player.y+player.h/2,'#ff688c',14);updateHud();if(lives<=0){high=Math.max(high,score);save();showOverlay('FIM DE JOGO','As sombras venceram desta vez. Pontuação: '+score,[{label:'TENTAR NOVAMENTE',primary:true,action:()=>start(level)},{label:'MENU PRINCIPAL',action:showMenu}])}}
+function update(dt){if(mode!=='playing')return;dt=Math.min(dt,.033);const speed=level===1?220:235+level*8;player.vx=(input.right?1:0)-(input.left?1:0);player.vx*=speed;if(player.vx)player.facing=player.vx>0?1:-1;player.vy+=1050*dt;if(jumpQueued&&player.onGround){player.vy=-440;sound(520,.1);player.onGround=false}jumpQueued=false;
+if(magicQueued&&player.magicCooldown<=0){player.magicCooldown=.6;sound(760,.12,'triangle');let hit=false;enemies.forEach(e=>{if(e.alive&&Math.abs((e.x+e.w/2)-(player.x+player.w/2))<125&&Math.abs(e.y-player.y)<85){e.alive=false;score+=25;burst(e.x+e.w/2,e.y,'#ce8cff',12);hit=true}});if(!hit)burst(player.x+player.w/2+((player.facing||1)*30),player.y+12,'#91eaff',5)}magicQueued=false;player.magicCooldown-=dt;player.invuln-=dt;
+const oldY=player.y;player.x+=player.vx*dt;player.x=Math.max(0,Math.min(worldWidth-player.w,player.x));player.y+=player.vy*dt;player.onGround=false;
+moving.forEach(m=>{m.phase+=dt*(1+level*.1);m.y=m.baseY+Math.sin(m.phase)*22});
+const all=platforms.concat(moving);if(player.vy>=0){for(const p of all){if(player.x+player.w>p.x&&player.x<p.x+p.w&&oldY+player.h<=p.y+7&&player.y+player.h>=p.y){player.y=p.y-player.h;player.vy=0;player.onGround=true;if(moving.includes(p))player.x+=Math.cos(p.phase)*22*dt;}}}
+if(player.y>H+90){hurt();player.y=H*.3;player.x=Math.max(20,player.x-80);player.vy=0}
+hazards.forEach(h=>{if(overlap(player,h))hurt()});
+enemies.forEach(e=>{if(!e.alive)return;e.x+=e.v*dt;if(e.x<e.min||e.x>e.max)e.v*=-1;if(overlap(player,e)){if(player.vy>80&&oldY+player.h<=e.y+8){e.alive=false;player.vy=-300;score+=30;burst(e.x,e.y,'#ffbf6a',10);sound(650)}else hurt()}});
+gems.forEach(g=>{if(!g.got&&overlap(player,{x:g.x-9,y:g.y-9,w:18,h:18})){g.got=true;score+=10;crystals++;sound(900,.07,'triangle');burst(g.x,g.y,'#71f4ff',7);updateHud()}});
+if(overlap(player,portal)){if(level<3){score+=50;unlocked=Math.max(unlocked,level+1);high=Math.max(high,score);save();showOverlay('FASE CONCLUÍDA!','Você encontrou o portal. Bônus +50 · Pontuação: '+score,[{label:'PRÓXIMA FASE',primary:true,action:()=>start(level+1)},{label:'MENU PRINCIPAL',action:showMenu}])}else{score+=100;high=Math.max(high,score);unlocked=3;save();showOverlay('VITÓRIA MÁGICA!','Você salvou o reino das sombras! Pontuação final: '+score,[{label:'JOGAR NOVAMENTE',primary:true,action:()=>start(1)},{label:'MENU PRINCIPAL',action:showMenu}])}}
+camera=Math.max(0,Math.min(worldWidth-W,player.x-W*.35));particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=240*dt;p.life-=dt});particles=particles.filter(p=>p.life>0);high=Math.max(high,score);updateHud()}
+function draw(){ctx.clearRect(0,0,W,H);const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,level===1?'#111d45':level===2?'#211843':'#301b3d');sky.addColorStop(1,'#080d1c');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+for(let i=0;i<55;i++){let x=((i*137-camera*.13)%(W+30)+W+30)%(W+30),y=(i*71)%Math.max(1,H*.65);ctx.fillStyle=`rgba(174,220,255,${.2+(i%4)*.12})`;ctx.fillRect(x,y,1.5,1.5)}
+// distant silhouettes
+for(let i=0;i<9;i++){let x=((i*180-camera*.24)%(W+200)+W+200)%(W+200)-60;ctx.fillStyle=level===3?'#241d3e':'#142747';ctx.beginPath();ctx.moveTo(x,H*.75);ctx.lineTo(x+35,H*.28+(i%3)*22);ctx.lineTo(x+70,H*.75);ctx.fill();ctx.fillRect(x+20,H*.55,30,H*.22)}
+ctx.save();ctx.translate(-camera,0);
+platforms.forEach((p,i)=>{ctx.fillStyle=i%2?'#25365b':'#1b2c4c';ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='#62d9e8';ctx.globalAlpha=.8;ctx.fillRect(p.x,p.y,p.w,3);ctx.globalAlpha=1;for(let x=p.x+15;x<p.x+p.w-5;x+=42){ctx.fillStyle='#101b34';ctx.fillRect(x,p.y+12,2,Math.min(18,p.h-12))}});
+moving.forEach(p=>{ctx.fillStyle='#38456e';ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='#c09aff';ctx.fillRect(p.x,p.y,p.w,3)});
+hazards.forEach(h=>{ctx.fillStyle='#ff5d86';ctx.beginPath();ctx.moveTo(h.x,h.y+h.h);ctx.lineTo(h.x+h.w/2,h.y-7);ctx.lineTo(h.x+h.w,h.y+h.h);ctx.fill()});
+gems.forEach(g=>{if(g.got)return;let bob=Math.sin(performance.now()/230+g.phase)*4;ctx.save();ctx.translate(g.x,g.y+bob);ctx.rotate(Math.PI/4);ctx.fillStyle='#6cf4ff';ctx.shadowColor='#56eaff';ctx.shadowBlur=12;ctx.fillRect(-7,-7,14,14);ctx.restore();ctx.shadowBlur=0});
+enemies.forEach(e=>{if(!e.alive)return;ctx.fillStyle='#ed648b';ctx.beginPath();ctx.ellipse(e.x+e.w/2,e.y+e.h/2,e.w/2,e.h/2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(e.x+6,e.y+8,4,5);ctx.fillRect(e.x+16,e.y+8,4,5);ctx.fillStyle='#1a1231';ctx.fillRect(e.x+7,e.y+10,2,3);ctx.fillRect(e.x+17,e.y+10,2,3)});
+ctx.save();ctx.translate(portal.x+portal.w/2,portal.y+portal.h/2);ctx.strokeStyle='#8cf6ff';ctx.lineWidth=4;ctx.shadowColor='#68eaff';ctx.shadowBlur=18;ctx.beginPath();ctx.ellipse(0,0,portal.w*.42,portal.h*.48,0,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='#8af6ff22';ctx.beginPath();ctx.ellipse(0,0,portal.w*.36,portal.h*.43,0,0,Math.PI*2);ctx.fill();ctx.restore();
+if(player){ctx.save();if(player.invuln>0&&Math.floor(performance.now()/90)%2)ctx.globalAlpha=.35;ctx.translate(player.x+player.w/2,player.y+player.h/2);ctx.fillStyle='#10172f';ctx.beginPath();ctx.ellipse(0,5,13,17,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#70eaff';ctx.beginPath();ctx.arc(0,-8,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#27365f';ctx.beginPath();ctx.moveTo(-12,-13);ctx.lineTo(0,-31);ctx.lineTo(12,-13);ctx.fill();ctx.fillStyle='#f5fbff';ctx.fillRect(2,-10,3,3);ctx.fillStyle='#a87cff';ctx.beginPath();ctx.moveTo(-10,10);ctx.lineTo(-19,23);ctx.lineTo(-2,17);ctx.fill();ctx.restore()}
+particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,4,4);ctx.globalAlpha=1});ctx.restore();
+if(mode==='playing'&&player.magicCooldown>0){ctx.fillStyle='#fff';ctx.font='12px system-ui';ctx.fillText('✦',W-24,H-16)}
+}
+function loop(t){raf=0;if(!lastTime)lastTime=t;const dt=Math.min((t-lastTime)/1000,.033);lastTime=t;if(mode==='playing')update(dt);draw();if(mode!=='menu')raf=requestAnimationFrame(loop);else{draw();}}
+function menuLoop(){draw();if(mode==='menu')requestAnimationFrame(menuLoop)}
+// Initial preview and safe fallback for unavailable storage.
+build(1);showMenu();menuLoop();
+})();
+</script>
+</body>
+</html>
