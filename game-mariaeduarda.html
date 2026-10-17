@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5b4bdb">
+<meta name="description" content="Estude de um jeito leve: matérias, flashcards, quiz e progresso.">
+<title>Estuda+ | Seu espaço de estudos</title>
+<style>
+:root{--primary:#5b4bdb;--primary-dark:#4032b4;--bg:#f5f6ff;--card:#fff;--text:#20213a;--muted:#747690;--line:#e8e8f4;--green:#19a974;--orange:#ffb547;--shadow:0 8px 28px rgba(44,39,112,.08)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);line-height:1.5;padding-bottom:calc(78px + env(safe-area-inset-bottom))}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible,input:focus-visible{outline:3px solid #aaa1ff;outline-offset:2px}.app{max-width:1120px;margin:auto;padding:0 16px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0}.brand{display:flex;align-items:center;gap:10px;font-weight:850;font-size:1.2rem;letter-spacing:-.5px}.brand-icon{width:42px;height:42px;border-radius:14px;background:var(--primary);display:grid;place-items:center;color:#fff;font-size:22px;box-shadow:0 6px 16px #5b4bdb44}.top-actions{display:flex;align-items:center;gap:8px}.icon-btn{border:1px solid var(--line);background:var(--card);border-radius:13px;width:42px;height:42px;display:grid;place-items:center;color:var(--text);font-size:19px}.welcome{padding:24px;border-radius:24px;color:white;background:linear-gradient(120deg,#5b4bdb,#8c65ed);position:relative;overflow:hidden;box-shadow:var(--shadow)}.welcome:after{content:"✦";position:absolute;right:24px;top:-24px;font-size:145px;color:#ffffff20;transform:rotate(15deg);pointer-events:none}.welcome .eyebrow{font-size:.83rem;color:#e5e0ff;font-weight:650}.welcome h1{font-size:clamp(1.65rem,5vw,2.3rem);line-height:1.13;margin:8px 0}.welcome p{max-width:560px;color:#eeeaff;margin:0 0 18px}.primary-btn,.light-btn,.outline-btn{border:0;border-radius:13px;padding:12px 16px;font-weight:750;min-height:44px}.light-btn{background:white;color:var(--primary)}.primary-btn{background:var(--primary);color:white}.outline-btn{background:var(--card);border:1px solid var(--line);color:var(--text)}.section{margin:28px 0}.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:14px}.section h2{font-size:1.25rem;margin:0;letter-spacing:-.35px}.section-head p{color:var(--muted);font-size:.9rem;margin:4px 0 0}.muted{color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}.stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px;min-width:0}.stat-icon{font-size:20px}.stat strong{display:block;font-size:1.45rem;margin:5px 0 0}.stat span:last-child{color:var(--muted);font-size:.78rem}.search-wrap{position:relative;margin:18px 0}.search-wrap span{position:absolute;left:15px;top:12px;font-size:19px}.search-wrap input{width:100%;height:48px;border:1px solid var(--line);border-radius:15px;background:white;padding:0 15px 0 45px;color:var(--text)}.subject-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.subject-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px;text-align:left;color:var(--text);min-height:150px;display:flex;flex-direction:column;align-items:flex-start;transition:transform .15s,border-color .15s;box-shadow:0 3px 12px #26205b05}.subject-card:active{transform:scale(.98)}.subject-card:hover{border-color:#c8c1ff}.subject-emoji{width:43px;height:43px;border-radius:14px;display:grid;place-items:center;font-size:23px;margin-bottom:12px}.subject-card strong{font-size:.98rem}.subject-card small{color:var(--muted);margin-top:4px}.subject-card .mini-progress{height:5px;background:#eeeef8;border-radius:10px;width:100%;margin-top:12px;overflow:hidden}.mini-progress i{display:block;height:100%;background:var(--primary);border-radius:10px}.activity-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.activity{background:var(--card);border:1px solid var(--line);border-radius:19px;padding:18px;display:flex;gap:13px;align-items:flex-start}.activity .big-icon{font-size:25px;width:48px;height:48px;display:grid;place-items:center;background:#f0edff;border-radius:15px;flex-shrink:0}.activity h3{font-size:1rem;margin:0 0 4px}.activity p{font-size:.85rem;color:var(--muted);margin:0 0 12px}.activity button{padding:9px 12px;font-size:.85rem;min-height:40px}.progress-panel{background:var(--card);border:1px solid var(--line);border-radius:19px;padding:18px}.progress-row{display:flex;justify-content:space-between;gap:10px;font-size:.9rem;margin:15px 0 7px}.bar{height:9px;border-radius:20px;background:#eeeef8;overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5b4bdb,#a18af7);border-radius:20px;transition:width .25s}.empty{padding:25px;text-align:center;color:var(--muted);background:white;border:1px dashed var(--line);border-radius:16px;grid-column:1/-1}.bottom-nav{position:fixed;z-index:10;bottom:0;left:0;right:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#ffffffed;backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;justify-content:space-around;gap:5px}.nav-btn{border:0;background:transparent;color:var(--muted);border-radius:12px;min-height:50px;min-width:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:1.2rem;flex:1}.nav-btn span{font-size:.69rem;font-weight:700}.nav-btn.active{color:var(--primary);background:#f0edff}.page{display:none}.page.active{display:block}.back-btn{border:0;background:transparent;color:var(--primary);font-weight:750;padding:10px 0;margin:4px 0}.lesson-list{display:grid;gap:10px}.lesson-item{display:flex;align-items:center;gap:12px;padding:15px;border-radius:16px;background:white;border:1px solid var(--line)}.lesson-item .lesson-symbol{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#f0edff;font-size:20px;flex-shrink:0}.lesson-item .lesson-copy{flex:1;min-width:0}.lesson-item strong{display:block}.lesson-item small{color:var(--muted)}.lesson-item button{min-width:75px}.content-box{background:white;border:1px solid var(--line);border-radius:20px;padding:20px;margin:14px 0}.content-box h3{margin:0 0 8px}.content-box p{color:#555770}.content-box li{margin:7px 0}.quiz-option{display:block;width:100%;text-align:left;background:white;border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin:9px 0;color:var(--text);min-height:48px}.quiz-option.selected{border-color:var(--primary);background:#f1efff}.quiz-option.correct{border-color:#1baf79;background:#edfff7}.quiz-option.wrong{border-color:#e25a65;background:#fff0f1}.feedback{padding:12px;border-radius:12px;margin-top:12px;font-weight:650}.flashcard{background:linear-gradient(140deg,#5b4bdb,#8867e8);color:white;border-radius:22px;padding:30px 22px;min-height:230px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}.flashcard small{color:#e2dcff}.flashcard h2{font-size:1.45rem;margin:15px 0}.flashcard p{color:#f0edff}.flash-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:15px}.field-label{display:block;font-weight:700;margin:15px 0 6px}.text-field{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:white;color:var(--text)}.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#24213f;color:white;padding:11px 16px;border-radius:12px;z-index:20;max-width:90%;box-shadow:var(--shadow);display:none}.toast.show{display:block}.footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0 10px}
+@media(min-width:760px){body{padding-bottom:20px}.app{padding:0 24px}.welcome{padding:34px}.subject-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.bottom-nav{position:static;max-width:520px;margin:20px auto 0;border:1px solid var(--line);border-radius:18px;padding:6px;background:white}.nav-btn{flex-direction:row;gap:8px;min-height:42px}.nav-btn span{font-size:.82rem}.toast{bottom:25px}.stats{max-width:600px}.main-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);gap:24px;align-items:start}.main-layout .section{margin-top:22px}.welcome{margin-top:4px}}
+@media(max-width:520px){.app{padding:0 13px}.topbar{padding:13px 0}.brand{font-size:1.08rem}.brand-icon{width:38px;height:38px}.welcome{padding:21px 18px;border-radius:20px}.welcome:after{right:0;font-size:110px}.stats{gap:8px}.stat{padding:12px 10px;border-radius:15px}.stat strong{font-size:1.25rem}.stat span:last-child{font-size:.72rem}.subject-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.subject-card{padding:14px;min-height:145px}.activity-grid{grid-template-columns:1fr}.activity{padding:15px}.section{margin:24px 0}.section h2{font-size:1.15rem}.content-box{padding:16px}.bottom-nav{gap:1px}.nav-btn{min-width:0}.nav-btn span{font-size:.65rem}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div class="brand-icon" aria-hidden="true">✦</div><span>Estuda<span style="color:var(--primary)">+</span></span></div>
+  <div class="top-actions"><button class="icon-btn" id="themeBtn" aria-label="Alternar tema" title="Alternar tema">☾</button><button class="icon-btn" id="profileBtn" aria-label="Meu perfil" title="Meu perfil">☺</button></div>
+</header>
+
+<main>
+<section id="homePage" class="page active">
+  <div class="welcome">
+    <div class="eyebrow">SEU CANTINHO DO CONHECIMENTO ✨</div>
+    <h1>Aprender pode ser<br>mais leve!</h1>
+    <p>Estude no seu ritmo, pratique um pouquinho por dia e acompanhe sua evolução.</p>
+    <button class="light-btn" onclick="showPage('subjectsPage')">Começar a estudar →</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><span class="stat-icon">📚</span><strong id="statLessons">0</strong><span>lições concluídas</span></div>
+    <div class="stat"><span class="stat-icon">🎯</span><strong id="statPoints">0</strong><span>pontos conquistados</span></div>
+    <div class="stat"><span class="stat-icon">🔥</span><strong id="statDays">1</strong><span>dia de estudos</span></div>
+  </div>
+  <div class="main-layout">
+    <div>
+      <section class="section">
+        <div class="section-head"><div><h2>Suas matérias</h2><p>Escolha o que quer aprender hoje.</p></div><button class="back-btn" onclick="showPage('subjectsPage')">Ver todas →</button></div>
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="homeSearch" type="search" placeholder="Buscar matéria..." aria-label="Buscar matéria"></div>
+        <div class="subject-grid" id="homeSubjects"></div>
+      </section>
+      <section class="section">
+        <div class="section-head"><div><h2>Aprenda praticando</h2><p>Treine seus conhecimentos de um jeito divertido.</p></div></div>
+        <div class="activity-grid">
+          <article class="activity"><div class="big-icon">🃏</div><div><h3>Flashcards</h3><p>Revise conceitos e memorize melhor.</p><button class="outline-btn" onclick="startFlashcards()">Estudar cartões</button></div></article>
+          <article class="activity"><div class="big-icon">🧠</div><div><h3>Quiz rápido</h3><p>Responda perguntas e ganhe pontos.</p><button class="outline-btn" onclick="startQuiz()">Jogar quiz</button></div></article>
+        </div>
+      </section>
+    </div>
+    <div>
+      <section class="section">
+        <div class="section-head"><div><h2>Seu progresso</h2><p>Cada passo conta!</p></div></div>
+        <div class="progress-panel"><div style="display:flex;justify-content:space-between;gap:10px"><strong>Meta de estudos</strong><strong id="progressPercent">0%</strong></div><p class="muted" style="font-size:.85rem;margin:5px 0 10px">Conclua 5 lições para atingir sua meta inicial.</p><div class="bar"><i id="progressBar"></i></div><div class="progress-row"><span>Lições concluídas</span><strong id="progressCount">0 de 5</strong></div></div>
+      </section>
+      <section class="section"><div class="section-head"><div><h2>Dica do dia 💡</h2></div></div><div class="content-box"><p style="margin:0">Estude por 20 minutos e faça uma pausa curta. Explicar o conteúdo com suas próprias palavras ajuda a lembrar melhor!</p></div></section>
+    </div>
+  </div>
+</section>
+
+<section id="subjectsPage" class="page">
+  <div class="section-head" style="margin-top:18px"><div><h2>Todas as matérias 📚</h2><p>Encontre uma matéria e comece uma lição.</p></div></div>
+  <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="subjectSearch" type="search" placeholder="Buscar matéria..." aria-label="Buscar matéria"></div>
+  <div class="subject-grid" id="allSubjects"></div>
+</section>
+
+<section id="lessonPage" class="page">
+  <button class="back-btn" onclick="showPage('subjectsPage')">← Voltar às matérias</button>
+  <div id="lessonContent"></div>
+</section>
+
+<section id="quizPage" class="page">
+  <button class="back-btn" onclick="showPage('homePage')">← Voltar ao início</button>
+  <div class="section-head"><div><h2>Quiz rápido 🧠</h2><p>Teste o que você sabe!</p></div><strong id="quizCounter">1/5</strong></div>
+  <div class="progress-panel" style="margin-bottom:14px"><div class="bar"><i id="quizBar"></i></div></div>
+  <div class="content-box" id="quizContent"></div>
+</section>
+
+<section id="flashPage" class="page">
+  <button class="back-btn" onclick="showPage('homePage')">← Voltar ao início</button>
+  <div class="section-head"><div><h2>Flashcards 🃏</h2><p>Leia a pergunta e revele a resposta.</p></div><strong id="flashCounter">1/5</strong></div>
+  <div class="flashcard"><small id="flashLabel">PERGUNTA</small><h2 id="flashQuestion">Carregando...</h2><p id="flashAnswer" hidden></p></div>
+  <div class="flash-actions"><button class="outline-btn" id="revealBtn">Revelar resposta</button><button class="primary-btn" id="nextFlashBtn">Próximo cartão →</button></div>
+</section>
+
+<section id="profilePage" class="page">
+  <div class="section-head" style="margin-top:18px"><div><h2>Meu perfil ☺</h2><p>Personalize seu cantinho de estudos.</p></div></div>
+  <div class="content-box">
+    <label class="field-label" for="studentName">Como quer ser chamado(a)?</label>
+    <input class="text-field" id="studentName" maxlength="40" placeholder="Digite seu nome">
+    <button class="primary-btn" style="margin-top:13px" id="saveProfileBtn">Salvar nome</button>
+  </div>
+  <div class="content-box"><h3>Seu resumo</h3><p>📚 Lições concluídas: <strong id="profileLessons">0</strong></p><p>⭐ Pontos: <strong id="profilePoints">0</strong></p><p>🧠 Respostas corretas: <strong id="profileCorrect">0</strong></p><button class="outline-btn" id="resetBtn">Reiniciar meu progresso</button></div>
+  <p class="muted" style="font-size:.82rem">Seu progresso fica salvo localmente neste dispositivo quando o armazenamento do WebView está disponível.</p>
+</section>
+</main>
+
+<nav class="bottom-nav" aria-label="Navegação principal">
+  <button class="nav-btn active" data-page="homePage" onclick="showPage('homePage',this)">⌂<span>Início</span></button>
+  <button class="nav-btn" data-page="subjectsPage" onclick="showPage('subjectsPage',this)">▤<span>Matérias</span></button>
+  <button class="nav-btn" data-page="flashPage" onclick="startFlashcards(this)">▣<span>Cartões</span></button>
+  <button class="nav-btn" data-page="quizPage" onclick="startQuiz(this)">✧<span>Quiz</span></button>
+  <button class="nav-btn" data-page="profilePage" onclick="showPage('profilePage',this)">☺<span>Perfil</span></button>
+</nav>
+<div class="footer">Feito para aprender um pouco todos os dias 💜</div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+const subjects=[
+ {id:'portugues',name:'Português',emoji:'✍️',color:'#fce9ee',desc:'Leitura, escrita e gramática',lessons:[
+  {title:'Substantivos',time:'5 min',body:'Substantivo é a palavra que dá nome a pessoas, animais, lugares, objetos, sentimentos e ideias.',points:['Comum: cidade, menina, cachorro.','Próprio: Brasil, Marina, São Paulo.','Concreto: cadeira, árvore.','Abstrato: alegria, coragem.'],question:'Qual palavra é um substantivo próprio?',options:['cidade','Brasil','cachorro'],answer:1,explain:'Brasil é nome próprio de um país e começa com letra maiúscula.'},
+  {title:'Adjetivos',time:'4 min',body:'Adjetivo é a palavra que mostra uma característica de alguém ou de alguma coisa.',points:['Exemplo: casa bonita.','“Bonita” é o adjetivo, pois descreve a casa.','Outros exemplos: rápido, alegre, azul.'],question:'Na frase “o gato esperto”, qual é o adjetivo?',options:['gato','o','esperto'],answer:2,explain:'Esperto descreve uma característica do gato.'}
+ ]},
+ {id:'matematica',name:'Matemática',emoji:'➗',color:'#e8eaff',desc:'Números, contas e raciocínio',lessons:[
+  {title:'As quatro operações',time:'6 min',body:'As operações básicas ajudam a resolver problemas do dia a dia.',points:['Adição (+): juntar quantidades.','Subtração (−): tirar ou comparar.','Multiplicação (×): somar grupos iguais.','Divisão (÷): repartir em partes iguais.'],question:'Quanto é 7 × 4?',options:['11','28','24'],answer:1,explain:'7 grupos de 4 formam 28.'},
+  {title:'Frações',time:'5 min',body:'A fração representa partes de um todo dividido em partes iguais.',points:['O número de cima é o numerador.','O número de baixo é o denominador.','1/2 significa uma de duas partes iguais.'],question:'Uma pizza foi dividida em 4 partes iguais. Você comeu 1. Qual fração comeu?',options:['1/4','4/1','1/2'],answer:0,explain:'Você comeu uma das quatro partes: 1/4.'}
+ ]},
+ {id:'ciencias',name:'Ciências',emoji:'🔬',color:'#e1f8ed',desc:'Natureza, corpo e universo',lessons:[
+  {title:'Sistema solar',time:'5 min',body:'O Sistema Solar é formado pelo Sol e pelos corpos celestes que giram ao seu redor.',points:['O Sol é uma estrela.','A Terra é o terceiro planeta a partir do Sol.','Existem oito planetas no Sistema Solar.','A Lua é o satélite natural da Terra.'],question:'Qual é a estrela do nosso Sistema Solar?',options:['Lua','Sol','Terra'],answer:1,explain:'O Sol é a estrela central do Sistema Solar.'},
+  {title:'Ciclo da água',time:'5 min',body:'A água circula pela natureza em um processo contínuo chamado ciclo da água.',points:['Evaporação: o calor transforma água líquida em vapor.','Condensação: o vapor forma gotinhas nas nuvens.','Precipitação: a água cai como chuva, neve ou granizo.'],question:'Como se chama a etapa em que a água cai das nuvens?',options:['Precipitação','Evaporação','Condensação'],answer:0,explain:'A precipitação é quando a água retorna à superfície.'}
+ ]},
+ {id:'historia',name:'História',emoji:'🏛️',color:'#fff0d9',desc:'Povos, culturas e acontecimentos',lessons:[
+  {title:'Fontes históricas',time:'4 min',body:'Fontes históricas são vestígios que ajudam a conhecer e entender o passado.',points:['Escritas: cartas, jornais e documentos.','Materiais: ferramentas, roupas e construções.','Orais: relatos e entrevistas.','Visuais: fotos, pinturas e desenhos.'],question:'Uma carta antiga é que tipo de fonte?',options:['Fonte escrita','Fonte natural','Fonte sonora'],answer:0,explain:'A carta contém texto, por isso é uma fonte escrita.'}
+ ]},
+ {id:'geografia',name:'Geografia',emoji:'🌎',color:'#dff5ff',desc:'Lugares, mapas e meio ambiente',lessons:[
+  {title:'Mapas e orientação',time:'5 min',body:'Os mapas representam espaços vistos de forma reduzida e usam símbolos para comunicar informações.',points:['Título: informa o tema do mapa.','Legenda: explica cores e símbolos.','Escala: relaciona a distância no mapa com a distância real.','A rosa dos ventos indica direções.'],question:'Qual parte do mapa explica seus símbolos?',options:['Legenda','Título','Margem'],answer:0,explain:'A legenda explica o significado dos símbolos e das cores.'}
+ ]},
+ {id:'ingles',name:'Inglês',emoji:'🌐',color:'#e9e5ff',desc:'Palavras e expressões em inglês',lessons:[
+  {title:'Saudações básicas',time:'4 min',body:'Saudações são usadas para cumprimentar pessoas em diferentes momentos.',points:['Hello = Olá.','Good morning = Bom dia.','Good afternoon = Boa tarde.','Goodbye = Tchau.','Thank you = Obrigado(a).'],question:'O que significa “Thank you”?',options:['Bom dia','Obrigado(a)','Até amanhã'],answer:1,explain:'“Thank you” é uma forma de agradecer em inglês.'}
+ ]},
+ {id:'tecnologia',name:'Tecnologia',emoji:'💻',color:'#e0f3ff',desc:'Computadores e mundo digital',lessons:[
+  {title:'Segurança na internet',time:'5 min',body:'Usar a internet com segurança é proteger seus dados e pensar antes de compartilhar informações.',points:['Crie senhas fortes e diferentes.','Não compartilhe endereço ou senha com desconhecidos.','Desconfie de links e mensagens suspeitas.','Peça ajuda a um adulto de confiança quando algo parecer estranho.'],question:'O que fazer ao receber um link suspeito?',options:['Clicar imediatamente','Enviar sua senha','Não clicar e pedir ajuda'],answer:2,explain:'Evite abrir links suspeitos e procure ajuda de alguém de confiança.'}
+ ]},
+ {id:'artes',name:'Artes',emoji:'🎨',color:'#ffe6f3',desc:'Cores, formas e criatividade',lessons:[
+  {title:'Cores primárias',time:'4 min',body:'No modelo tradicional de pintura, as cores primárias são usadas para criar outras cores.',points:['Vermelho, amarelo e azul são cores primárias no modelo tradicional.','Misturar amarelo e azul produz verde.','Misturar vermelho e amarelo produz laranja.'],question:'No modelo tradicional de pintura, qual é uma cor primária?',options:['Verde','Roxo','Amarelo'],answer:2,explain:'Amarelo é uma das três cores primárias do modelo tradicional.'}
+ ]},
+ {id:'educacaofisica',name:'Educação Física',emoji:'⚽',color:'#e4f8e7',desc:'Movimento, esporte e bem-estar',lessons:[
+  {title:'Movimento e saúde',time:'4 min',body:'A atividade física ajuda o corpo a se movimentar, fortalece músculos e ossos e pode melhorar o humor.',points:['Escolha atividades adequadas à sua idade.','Beba água ao longo do dia.','Faça aquecimento antes de atividades intensas.','Respeite seus limites e descanse.'],question:'Por que beber água durante atividades físicas?',options:['Para ajudar na hidratação','Para substituir o sono','Para não precisar descansar'],answer:0,explain:'A água ajuda a repor líquidos e manter o corpo hidratado.'}
+ ]}
+];
+const allQuestions=[
+ {q:'Quanto é 9 + 6?',opts:['14','15','16'],a:1,why:'9 + 6 = 15.'},
+ {q:'Qual planeta é conhecido como Planeta Vermelho?',opts:['Marte','Vênus','Saturno'],a:0,why:'Marte é conhecido como Planeta Vermelho.'},
+ {q:'Qual é o plural de “animal”?',opts:['animals','animales','animais'],a:2,why:'O plural correto é animais.'},
+ {q:'Qual é a principal estrela do Sistema Solar?',opts:['Sirius','Sol','Lua'],a:1,why:'O Sol é a estrela do nosso Sistema Solar.'},
+ {q:'Quanto é metade de 50?',opts:['20','25','30'],a:1,why:'50 dividido por 2 é 25.'},
+ {q:'Qual atitude ajuda a proteger o meio ambiente?',opts:['Desperdiçar água','Jogar lixo no rio','Separar materiais recicláveis'],a:2,why:'Separar materiais recicláveis ajuda a reduzir o lixo.'},
+ {q:'“Good morning” significa:',opts:['Boa noite','Bom dia','Obrigado'],a:1,why:'Good morning significa bom dia.'},
+ {q:'Qual dispositivo é usado para digitar no computador?',opts:['Teclado','Monitor','Caixa de som'],a:0,why:'Usamos o teclado para digitar.'}
+];
+const cards=[
+ {q:'O que é um substantivo?',a:'É a palavra que dá nome a pessoas, animais, lugares, objetos, sentimentos e ideias.'},
+ {q:'Quanto é 8 × 6?',a:'48.'},
+ {q:'Qual é a estrela do Sistema Solar?',a:'O Sol.'},
+ {q:'O que é uma fonte histórica?',a:'É um vestígio, objeto, documento ou relato que ajuda a conhecer o passado.'},
+ {q:'Como se diz “obrigado(a)” em inglês?',a:'Thank you.'},
+ {q:'O que é reciclagem?',a:'É transformar ou reaproveitar materiais para que possam ser usados novamente.'},
+ {q:'Quais são as quatro operações básicas?',a:'Adição, subtração, multiplicação e divisão.'},
+ {q:'O que uma legenda de mapa explica?',a:'O significado dos símbolos e das cores usados no mapa.'}
+];
+const STORE='estudamais_progress_v1';
+let state={done:[],points:0,correct:0,name:'',days:1,lastDate:'',dark:false};
+function loadState(){try{const s=localStorage.getItem(STORE);if(s){const parsed=JSON.parse(s);state={...state,...parsed};}}catch(e){} const today=new Date().toISOString().slice(0,10);if(state.lastDate!==today){state.days=Math.max(1,Number(state.days)||1);state.lastDate=today;saveState();}}
+function saveState(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2300);}
+function showPage(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));if(btn&&btn.dataset&&btn.dataset.page)btn.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});if(id==='profilePage')renderStats();}
+function doneCount(){return state.done.length;}
+function updateStats(){document.getElementById('statLessons').textContent=doneCount();document.getElementById('statPoints').textContent=state.points;document.getElementById('statDays').textContent=state.days||1;const pct=Math.min(100,doneCount()/5*100);document.getElementById('progressPercent').textContent=Math.round(pct)+'%';document.getElementById('progressBar').style.width=pct+'%';document.getElementById('progressCount').textContent=Math.min(doneCount(),5)+' de 5';document.getElementById('profileLessons').textContent=doneCount();document.getElementById('profilePoints').textContent=state.points;document.getElementById('profileCorrect').textContent=state.correct;document.getElementById('studentName').value=state.name||'';}
+function renderStats(){updateStats();if(state.name){document.querySelector('.welcome h1').innerHTML='Olá, '+escapeHtml(state.name)+'!<br>Vamos aprender?';}}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function subjectCard(s){const total=s.lessons.length,completed=s.lessons.filter(l=>state.done.includes(s.id+'-'+l.title)).length;return `<button class="subject-card" data-subject="${s.id}" aria-label="Abrir ${s.name}" onclick="openSubject('${s.id}')"><span class="subject-emoji" style="background:${s.color}">${s.emoji}</span><strong>${s.name}</strong><small>${s.desc}</small><div class="mini-progress"><i style="width:${total?completed/total*100:0}%"></i></div></button>`;}
+function renderSubjects(query=''){const q=query.trim().toLocaleLowerCase('pt-BR');const found=subjects.filter(s=>(s.name+' '+s.desc).toLocaleLowerCase('pt-BR').includes(q));const markup=found.map(subjectCard).join('')||'<div class="empty">Nenhuma matéria encontrada. Tente outra palavra.</div>';document.getElementById('homeSubjects').innerHTML=markup;document.getElementById('allSubjects').innerHTML=markup;}
+window.openSubject=function(id){const s=subjects.find(x=>x.id===id);if(!s)return;showPage('lessonPage');document.getElementById('lessonContent').innerHTML=`<div class="welcome" style="background:linear-gradient(120deg,${s.color},#fff);color:var(--text);box-shadow:none;border:1px solid var(--line)"><div style="font-size:38px">${s.emoji}</div><h1>${s.name}</h1><p style="color:var(--muted)">${s.desc}. Escolha uma lição abaixo.</p></div><section class="section"><h2>Lições disponíveis</h2><div class="lesson-list" style="margin-top:13px">${s.lessons.map((l,i)=>`<div class="lesson-item"><div class="lesson-symbol">${state.done.includes(s.id+'-'+l.title)?'✅':'📖'}</div><div class="lesson-copy"><strong>${l.title}</strong><small>${l.time} · ${state.done.includes(s.id+'-'+l.title)?'Concluída':'Lição rápida'}</small></div><button class="${state.done.includes(s.id+'-'+l.title)?'outline-btn':'primary-btn'}" onclick="openLesson('${s.id}',${i})">${state.done.includes(s.id+'-'+l.title)?'Rever':'Estudar'}</button></div>`).join('')}</div></section>`;};
+window.openLesson=function(id,index){const s=subjects.find(x=>x.id===id),l=s&&s.lessons[index];if(!l)return;const key=id+'-'+l.title;document.getElementById('lessonContent').innerHTML=`<button class="back-btn" onclick="openSubject('${id}')">← Voltar para ${s.name}</button><div class="section-head"><div><h2>${s.emoji} ${l.title}</h2><p>${s.name} · ${l.time}</p></div></div><article class="content-box"><h3>Vamos aprender!</h3><p>${l.body}</p><ul>${l.points.map(p=>'<li>'+p+'</li>').join('')}</ul></article><article class="content-box"><h3>🤔 Hora de praticar</h3><p>${l.question}</p><div id="lessonOptions">${l.options.map((o,i)=>`<button class="quiz-option" onclick="answerLesson('${id}',${index},${i})">${o}</button>`).join('')}</div><div id="lessonFeedback" aria-live="polite"></div><button class="primary-btn" style="margin-top:14px" id="completeLessonBtn" onclick="completeLesson('${id}',${index})">${state.done.includes(key)?'Lição já concluída ✓':'Marcar lição como concluída ✓'}</button></article>`;showPage('lessonPage');};
+window.answerLesson=function(id,index,choice){const l=subjects.find(s=>s.id===id).lessons[index];document.querySelectorAll('#lessonOptions .quiz-option').forEach((b,i)=>{b.disabled=true;if(i===l.answer)b.classList.add('correct');else if(i===choice)b.classList.add('wrong');});const good=choice===l.answer;if(good){state.correct++;state.points+=5;saveState();updateStats();}document.getElementById('lessonFeedback').innerHTML=`<div class="feedback" style="background:${good?'#edfff7':'#fff0f1'};color:${good?'#08784d':'#a52c38'}">${good?'Muito bem! +5 pontos 🎉':'Quase! Tudo bem, continue praticando.'} ${l.explain}</div>`;};
+window.completeLesson=function(id,index){const l=subjects.find(s=>s.id===id).lessons[index],key=id+'-'+l.title;if(!state.done.includes(key)){state.done.push(key);state.points+=10;saveState();updateStats();toast('Lição concluída! Você ganhou 10 pontos 🎉');}else toast('Essa lição já está concluída.');openSubject(id);};
+let quizIndex=0,quizScore=0,quizSet=[],quizLocked=false;
+window.startQuiz=function(btn){quizSet=[...allQuestions].sort(()=>Math.random()-.5).slice(0,5);quizIndex=0;quizScore=0;quizLocked=false;showPage('quizPage',btn);renderQuiz();};
+function renderQuiz(){const box=document.getElementById('quizContent');if(quizIndex>=quizSet.length){box.innerHTML=`<div style="text-align:center;padding:16px"><div style="font-size:55px">🏆</div><h2>Quiz finalizado!</h2><p>Você acertou <strong>${quizScore} de ${quizSet.length}</strong> perguntas.</p><p>Ganhou <strong>${quizScore*10} pontos</strong>!</p><button class="primary-btn" onclick="startQuiz()">Jogar novamente</button> <button class="outline-btn" onclick="showPage('homePage')">Voltar ao início</button></div>`;document.getElementById('quizCounter').textContent='Concluído';document.getElementById('quizBar').style.width='100%';return;}quizLocked=false;const q=quizSet[quizIndex];document.getElementById('quizCounter').textContent=(quizIndex+1)+'/'+quizSet.length;document.getElementById('quizBar').style.width=(quizIndex/quizSet.length*100)+'%';box.innerHTML=`<h3>${quizIndex+1}. ${q.q}</h3><div>${q.opts.map((o,i)=>`<button class="quiz-option" onclick="chooseQuiz(${i})">${o}</button>`).join('')}</div><div id="quizFeedback" aria-live="polite"></div><button class="primary-btn" id="quizNext" style="margin-top:14px" disabled onclick="nextQuestion()">Próxima pergunta →</button>`;}
+window.chooseQuiz=function(i){if(quizLocked)return;quizLocked=true;const q=quizSet[quizIndex],good=i===q.a;if(good){quizScore++;state.correct++;state.points+=10;saveState();updateStats();}document.querySelectorAll('#quizContent .quiz-option').forEach((b,j)=>{b.disabled=true;if(j===q.a)b.classList.add('correct');else if(j===i)b.classList.add('wrong');});document.getElementById('quizFeedback').innerHTML=`<div class="feedback" style="background:${good?'#edfff7':'#fff0f1'};color:${good?'#08784d':'#a52c38'}">${good?'Resposta certa! +10 pontos 🎉':'Não foi dessa vez.'} ${q.why}</div>`;document.getElementById('quizNext').disabled=false;};
+window.nextQuestion=function(){quizIndex++;renderQuiz();if(quizIndex>=quizSet.length){state.points+=quizScore*0;saveState();updateStats();}};
+let flashIndex=0,flashSet=[];
+window.startFlashcards=function(btn){flashSet=[...cards].sort(()=>Math.random()-.5);flashIndex=0;showPage('flashPage',btn);renderFlash();};
+function renderFlash(){const c=flashSet[flashIndex%flashSet.length];document.getElementById('flashCounter').textContent=(flashIndex%flashSet.length+1)+'/'+flashSet.length;document.getElementById('flashQuestion').textContent=c.q;document.getElementById('flashAnswer').textContent=c.a;document.getElementById('flashAnswer').hidden=true;document.getElementById('flashLabel').textContent='PERGUNTA';document.getElementById('revealBtn').textContent='Revelar resposta';}
+document.getElementById('revealBtn').addEventListener('click',()=>{const a=document.getElementById('flashAnswer');a.hidden=!a.hidden;document.getElementById('flashLabel').textContent=a.hidden?'PERGUNTA':'RESPOSTA';document.getElementById('revealBtn').textContent=a.hidden?'Revelar resposta':'Esconder resposta';if(!a.hidden){state.points+=1;saveState();updateStats();}});
+document.getElementById('nextFlashBtn').addEventListener('click',()=>{flashIndex++;renderFlash();});
+document.getElementById('homeSearch').addEventListener('input',e=>{renderSubjects(e.target.value);if(e.target.value.trim())showPage('homePage');});
+document.getElementById('subjectSearch').addEventListener('input',e=>{renderSubjects(e.target.value);});
+document.getElementById('profileBtn').addEventListener('click',()=>showPage('profilePage'));
+document.getElementById('saveProfileBtn').addEventListener('click',()=>{state.name=document.getElementById('studentName').value.trim().slice(0,40);saveState();renderStats();toast(state.name?'Nome salvo! 💜':'Nome removido.');});
+document.getElementById('resetBtn').addEventListener('click',()=>{if(confirm('Quer mesmo apagar suas lições, pontos e respostas corretas deste dispositivo?')){state.done=[];state.points=0;state.correct=0;state.days=1;saveState();updateStats();renderSubjects();toast('Progresso reiniciado.');showPage('homePage');}});
+document.getElementById('themeBtn').addEventListener('click',()=>{state.dark=!state.dark;document.body.style.setProperty('--bg',state.dark?'#171629':'#f5f6ff');document.body.style.setProperty('--card',state.dark?'#24223a':'#fff');document.body.style.setProperty('--text',state.dark?'#f6f4ff':'#20213a');document.body.style.setProperty('--muted',state.dark?'#b8b5d0':'#747690');document.body.style.setProperty('--line',state.dark?'#393650':'#e8e8f4');document.getElementById('themeBtn').textContent=state.dark?'☀':'☾';saveState();});
+loadState();if(state.dark){state.dark=false;}renderSubjects();updateStats();renderQuiz();renderFlash();
+})();
+</script>
+</body>
+</html>
