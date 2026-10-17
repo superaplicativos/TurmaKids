@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#101820">
+<title>Operação Zona Urbana</title>
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101820;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;touch-action:none;user-select:none}
+canvas{display:block;width:100%;height:100%;touch-action:none;background:#26352f}
+#hud{position:fixed;inset:0;pointer-events:none;color:#fff;text-shadow:0 2px 3px #000}
+.topbar{position:absolute;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.panel{background:#101820d9;border:1px solid #ffffff36;border-radius:12px;padding:8px 11px;backdrop-filter:blur(6px);font-size:12px}
+.panel b{display:block;font-size:18px;line-height:1.25;color:#ffe27a}
+#healthOuter{width:105px;height:8px;background:#482c2c;border-radius:8px;overflow:hidden;margin-top:4px}
+#health{height:100%;width:100%;background:#6bea8a;transition:width .15s}
+#hint{position:absolute;top:78px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#101820bb;padding:6px 10px;border-radius:8px;font-size:11px;color:#e5f4e9}
+#controls{position:fixed;inset:0;pointer-events:none}
+#joy{position:absolute;left:max(18px,env(safe-area-inset-left));bottom:max(24px,env(safe-area-inset-bottom));width:128px;height:128px;border-radius:50%;background:#dce8f022;border:2px solid #ffffff4d;pointer-events:auto;touch-action:none}
+#nub{position:absolute;width:54px;height:54px;left:35px;top:35px;border-radius:50%;background:#dce8f088;border:2px solid #fff9;box-shadow:0 2px 8px #0007}
+#fire{position:absolute;right:max(22px,env(safe-area-inset-right));bottom:max(34px,env(safe-area-inset-bottom));width:82px;height:82px;border-radius:50%;border:2px solid #ffedb8;background:#ef5c45d9;color:white;font-weight:900;font-size:14px;pointer-events:auto;touch-action:none;box-shadow:0 0 0 7px #ef5c4528}
+#reload{position:absolute;right:max(28px,env(safe-area-inset-right));bottom:max(130px,calc(env(safe-area-inset-bottom) + 130px));border:1px solid #fff8;border-radius:12px;padding:10px 12px;background:#101820d9;color:white;font-weight:800;pointer-events:auto}
+#screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(#0b1118bd,#0b1118e8);padding:22px;z-index:5}
+.card{max-width:430px;width:100%;background:#17242b;border:1px solid #a9c4b94d;border-radius:22px;padding:25px 22px;text-align:center;box-shadow:0 18px 70px #0009}
+h1{font-size:clamp(25px,6vw,38px);line-height:1.05;margin:0 0 10px;color:#ffe27a}
+.card p{color:#d7e4df;line-height:1.5;font-size:14px}
+.action{border:0;border-radius:14px;background:#ffcb4b;color:#172027;font-weight:900;font-size:17px;padding:15px 25px;min-height:52px;width:100%;margin-top:8px}
+.small{font-size:11px!important;color:#9fb5ac!important}
+@media(min-width:800px){#joy{width:145px;height:145px}#nub{left:42px;top:42px}#fire{width:92px;height:92px}}
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="Jogo de tiro urbano"></canvas>
+<div id="hud">
+ <div class="topbar">
+  <div class="panel">VIDA<div id="healthOuter"><div id="health"></div></div><span id="hpText">100%</span></div>
+  <div class="panel">MISSÃO <b id="mission">01</b><span id="enemiesText">Inimigos: 0</span></div>
+  <div class="panel">PONTOS <b id="score">0</b><span id="fps">FPS: --</span></div>
+ </div>
+ <div id="hint">Use o controle para andar • toque em ATIRAR</div>
+</div>
+<div id="controls">
+ <div id="joy"><div id="nub"></div></div>
+ <button id="reload">↻ REINICIAR</button>
+ <button id="fire">ATIRAR</button>
+</div>
+<div id="screen">
+ <div class="card">
+  <h1>OPERAÇÃO<br>ZONA URBANA</h1>
+  <p>Explore ruas, casas e prédios. Use as construções como cobertura, aproxime-se com cuidado e elimine os adversários para concluir a missão.</p>
+  <p><b>Como jogar:</b> arraste o controle esquerdo para andar. Toque em qualquer lugar da tela para mirar; segure <b>ATIRAR</b> para disparar. Paredes e prédios bloqueiam os tiros — use-os para se esconder.</p>
+  <button class="action" id="start">INICIAR MISSÃO</button>
+  <p class="small">Jogo demonstrativo offline • sem cadastro e sem compras</p>
+ </div>
+</div>
+<script>
+(()=>{
+'use strict';
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d',{alpha:false});
+const joy=document.getElementById('joy'),nub=document.getElementById('nub'),fireBtn=document.getElementById('fire');
+const screen=document.getElementById('screen'),startBtn=document.getElementById('start');
+const healthEl=document.getElementById('health'),hpText=document.getElementById('hpText'),scoreEl=document.getElementById('score'),missionEl=document.getElementById('mission'),enemiesEl=document.getElementById('enemiesText');
+let W=0,H=0,dpr=1,last=0,running=false,gameOver=false,score=0,mission=1,spawnClock=0,damageFlash=0,fpsFrames=0,fpsTime=0,currentFps=0;
+const world={w:2200,h:1600};
+const player={x:260,y:260,r:13,angle:0,hp:100,speed:190,cool:0};
+let camera={x:0,y:0},walls=[],enemies=[],bullets=[],enemyBullets=[],particles=[],joyVec={x:0,y:0},joyPointer=null,fireHeld=false,aimPointer=null;
+const rand=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const bushes=[];
+for(const [bx,by] of [[350,250],[760,350],[1290,360],[1740,350],[355,760],[1050,690],[1730,780],[740,1150],[1390,1170],[1900,1200]]){for(let k=0;k<5;k++)bushes.push({x:bx+rand(-13,13),y:by+rand(-10,10),r:rand(9,15),color:['#234b35','#2c5b3d','#396746'][k%3]})}
+function resize(){dpr=Math.min(window.devicePixelRatio||1,1.35);W=innerWidth;H=innerHeight;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
+window.addEventListener('resize',resize);resize();
+function makeCity(){
+ walls=[];
+ // Buildings and houses with courtyards and alleyways. Rectangles are solid cover.
+ const blocks=[
+ [480,100,260,210,'building'],[820,100,190,150,'house'],[1110,90,300,230,'building'],[1540,110,230,180,'house'],
+ [80,500,250,210,'building'],[410,470,170,150,'house'],[700,470,300,250,'building'],[1120,480,180,150,'house'],[1410,440,310,250,'building'],[1810,480,240,170,'house'],
+ [110,900,180,180,'house'],[390,850,300,230,'building'],[790,900,190,150,'house'],[1080,850,260,210,'building'],[1460,880,190,160,'house'],[1760,850,300,230,'building'],
+ [470,1260,240,170,'house'],[850,1230,300,220,'building'],[1310,1240,200,170,'house']
+ ];
+ for(const [x,y,w,h,type] of blocks) walls.push({x,y,w,h,type,shade:Math.floor(rand(0,3)),hp:Infinity});
+ // road barriers and cover
+ [[365,330,105,24],[1040,355,115,24],[1350,720,115,24],[690,760,100,24],[1510,1110,110,24],[260,1160,95,24],[1850,730,100,24]].forEach(([x,y,w,h])=>walls.push({x,y,w,h,type:'barrier',shade:0}));
+}
+makeCity();
+function circleRect(cx,cy,r,o){const x=clamp(cx,o.x,o.x+o.w),y=clamp(cy,o.y,o.y+o.h);return (cx-x)**2+(cy-y)**2<r*r}
+function blocked(x,y,r){return walls.some(o=>circleRect(x,y,r,o))}
+function lineHits(x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1,steps=Math.ceil(Math.hypot(dx,dy)/10);for(let i=1;i<steps;i++){const x=x1+dx*i/steps,y=y1+dy*i/steps;if(walls.some(o=>x>=o.x&&x<=o.x+o.w&&y>=o.y&&y<=o.y+o.h))return true}return false}
+function spawnEnemies(n=7){enemies=[];for(let i=0;i<n;i++){let x,y,tries=0;do{x=rand(80,world.w-80);y=rand(80,world.h-80);tries++}while((Math.hypot(x-player.x,y-player.y)<300||blocked(x,y,18))&&tries<100);enemies.push({x,y,r:12,hp:2,angle:0,cool:rand(.5,1.8),speed:rand(42,66),alive:true,flash:0})}}
+function reset(){score=0;player.x=260;player.y=260;player.hp=100;player.angle=0;player.cool=0;mission=1;bullets=[];enemyBullets=[];particles=[];gameOver=false;damageFlash=0;makeCity();spawnEnemies(7);running=true;screen.style.display='none';updateHud()}
+function updateHud(){scoreEl.textContent=score;missionEl.textContent=String(mission).padStart(2,'0');enemiesEl.textContent='Inimigos: '+enemies.filter(e=>e.alive).length;healthEl.style.width=player.hp+'%';hpText.textContent=Math.ceil(player.hp)+'%'}
+function moveEntity(ent,dx,dy,r){if(!blocked(ent.x+dx,ent.y,r))ent.x+=dx;if(!blocked(ent.x,ent.y+dy,r))ent.y+=dy;ent.x=clamp(ent.x,r,world.w-r);ent.y=clamp(ent.y,r,world.h-r)}
+function shootPlayer(){if(player.cool>0||!running)return;player.cool=.19;const a=player.angle;bullets.push({x:player.x+Math.cos(a)*18,y:player.y+Math.sin(a)*18,vx:Math.cos(a)*680,vy:Math.sin(a)*680,life:1.05});if(particles.length<90)for(let i=0;i<2;i++)particles.push({x:player.x+Math.cos(a)*19,y:player.y+Math.sin(a)*19,vx:rand(-45,45)+Math.cos(a)*rand(50,140),vy:rand(-45,45)+Math.sin(a)*rand(50,140),life:rand(.07,.16),color:'#ffd777'})}
+function shootEnemy(e){const a=Math.atan2(player.y-e.y,player.x-e.x);enemyBullets.push({x:e.x+Math.cos(a)*14,y:e.y+Math.sin(a)*14,vx:Math.cos(a)*290,vy:Math.sin(a)*290,life:2})}
+function update(dt){
+ if(!running)return;
+ player.cool=Math.max(0,player.cool-dt);damageFlash=Math.max(0,damageFlash-dt);
+ let dx=joyVec.x,dy=joyVec.y,len=Math.hypot(dx,dy);if(len>1){dx/=len;dy/=len}
+ if(Math.abs(dx)+Math.abs(dy)>.05){moveEntity(player,dx*player.speed*dt,dy*player.speed*dt);if(!aimPointer)player.angle=Math.atan2(dy,dx)}
+ if(aimPointer){const rect=canvas.getBoundingClientRect();const wx=aimPointer.x+camera.x,wy=aimPointer.y+camera.y;player.angle=Math.atan2(wy-player.y,wx-player.x)}
+ if(fireHeld)shootPlayer();
+ for(const b of bullets){b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;if(walls.some(o=>b.x>=o.x&&b.x<=o.x+o.w&&b.y>=o.y&&b.y<=o.y+o.h))b.life=0;for(const e of enemies){if(e.alive&&Math.hypot(e.x-b.x,e.y-b.y)<e.r+4){e.hp--;e.flash=.12;b.life=0;if(e.hp<=0){e.alive=false;score+=100;if(particles.length<90)for(let i=0;i<5;i++)particles.push({x:e.x,y:e.y,vx:rand(-100,100),vy:rand(-100,100),life:rand(.15,.4),color:'#ff735e'})}break}}}
+ bullets=bullets.filter(b=>b.life>0&&b.x>0&&b.y>0&&b.x<world.w&&b.y<world.h);
+ for(const b of enemyBullets){b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;if(walls.some(o=>b.x>=o.x&&b.x<=o.x+o.w&&b.y>=o.y&&b.y<=o.y+o.h))b.life=0;if(Math.hypot(player.x-b.x,player.y-b.y)<player.r+4){b.life=0;player.hp-=8;damageFlash=.13}}
+ enemyBullets=enemyBullets.filter(b=>b.life>0&&b.x>0&&b.y>0&&b.x<world.w&&b.y<world.h);
+ for(const e of enemies){if(!e.alive)continue;e.cool-=dt;e.flash=Math.max(0,e.flash-dt);const dist=Math.hypot(player.x-e.x,player.y-e.y),a=Math.atan2(player.y-e.y,player.x-e.x);e.angle=a;if(dist>175){let vx=Math.cos(a),vy=Math.sin(a);const tx=e.x+vx*e.speed*dt,ty=e.y+vy*e.speed*dt;if(!blocked(tx,ty,e.r))moveEntity(e,vx*e.speed*dt,vy*e.speed*dt,e.r);else{const side=Math.random()<.5?1:-1;moveEntity(e,-vy*e.speed*dt*side,vx*e.speed*dt*side,e.r)}}else if(dist<110){moveEntity(e,-Math.cos(a)*e.speed*.5*dt,-Math.sin(a)*e.speed*.5*dt,e.r)}
+ if(dist<530&&e.cool<=0&&!lineHits(e.x,e.y,player.x,player.y)){shootEnemy(e);e.cool=rand(1.1,2.1)}}
+ for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;p.vx*=.96;p.vy*=.96}particles=particles.filter(p=>p.life>0);
+ const alive=enemies.filter(e=>e.alive).length;
+ if(alive===0){mission++;player.hp=Math.min(100,player.hp+25);spawnEnemies(6+mission*2);player.x=260;player.y=260;bullets=[];enemyBullets=[]}
+ if(player.hp<=0){player.hp=0;running=false;gameOver=true;showEnd(false)}
+ camera.x=clamp(player.x-W/2,0,world.w-W);camera.y=clamp(player.y-H/2,0,world.h-H);
+ updateHud()
+}
+function roundedRect(x,y,w,h,r,fill,stroke){
+ ctx.beginPath();
+ if(typeof ctx.roundRect==='function'){ctx.roundRect(x,y,w,h,r)}
+ else {const rr=Math.min(r,w/2,h/2);ctx.moveTo(x+rr,y);ctx.arcTo(x+w,y,x+w,y+h,rr);ctx.arcTo(x+w,y+h,x,y+h,rr);ctx.arcTo(x,y+h,x,y,rr);ctx.arcTo(x,y,x+w,y,rr);ctx.closePath()}
+ ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke()}
+}
+function drawBuilding(o){
+ const x=o.x,y=o.y,w=o.w,h=o.h;
+ if(o.type==='barrier'){roundedRect(x+3,y+5,w,h,4,'#17221f99');roundedRect(x,y,w,h,4,'#c2c5b8','#66746c');for(let i=8;i<w-5;i+=23){ctx.fillStyle='#dfe0d3';ctx.fillRect(x+i,y+4,7,h-8)}return}
+ // shadow + roof, outer wall and roof details
+ roundedRect(x+10,y+13,w,h,7,'#111b1a99');
+ const colors=o.type==='house'?['#b77d5b','#98644d','#d0a07b']:['#788b8d','#627779','#9aada8'];
+ roundedRect(x,y,w,h,7,colors[o.shade], '#293c3b');
+ ctx.fillStyle='#344849';ctx.fillRect(x+8,y+8,w-16,h-16);
+ ctx.fillStyle=colors[o.shade];ctx.fillRect(x+13,y+13,w-26,h-26);
+ // rooftop patterns
+ if(o.type==='house'){
+   ctx.fillStyle='#744c43';ctx.fillRect(x+w*.2,y+h*.24,w*.6,h*.52);
+   ctx.fillStyle='#a9b6ac';ctx.fillRect(x+w*.27,y+h*.31,w*.15,h*.17);ctx.fillRect(x+w*.58,y+h*.31,w*.15,h*.17);
+   ctx.fillStyle='#3c514f';ctx.fillRect(x+w*.42,y+h*.64,w*.16,h*.22);
+   ctx.strokeStyle='#e3c8a2';ctx.lineWidth=3;ctx.strokeRect(x+w*.2,y+h*.24,w*.6,h*.52)
+ }else{
+   ctx.fillStyle='#344a4a';ctx.fillRect(x+w*.13,y+h*.15,w*.74,h*.7);
+   for(let xx=x+w*.2;xx<x+w*.8;xx+=31)for(let yy=y+h*.22;yy<y+h*.72;yy+=31){ctx.fillStyle='#b5d4d0';ctx.fillRect(xx,yy,14,11);ctx.fillStyle='#4c6666';ctx.fillRect(xx+2,yy+2,10,7)}
+   ctx.fillStyle='#a2afaa';ctx.fillRect(x+w*.08,y+h*.08,w*.84,5);
+ }
+ // clear perimeter to visually communicate solid cover
+ ctx.strokeStyle='#d5d5bc';ctx.globalAlpha=.35;ctx.lineWidth=2;ctx.strokeRect(x+4,y+4,w-8,h-8);ctx.globalAlpha=1;
+}
+function drawPerson(x,y,angle,color,isPlayer,flash=false){
+ ctx.save();ctx.translate(x,y);ctx.rotate(angle);
+ ctx.fillStyle='#0008';ctx.beginPath();ctx.ellipse(2,5,13,9,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=flash?'#fff':color;ctx.beginPath();ctx.arc(0,0,12,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=isPlayer?'#c8d9d5':'#272d30';ctx.beginPath();ctx.arc(-2,-2,7,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#1d2628';ctx.fillRect(2,-4,18,7);ctx.fillStyle='#a6b6ae';ctx.fillRect(15,-2,10,3);
+ if(isPlayer){ctx.strokeStyle='#f4e8a7';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,15,-.7,.7);ctx.stroke()}
+ ctx.restore()
+}
+function render(){
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);ctx.fillStyle='#34453b';ctx.fillRect(0,0,W,H);
+ ctx.save();ctx.translate(-camera.x,-camera.y);
+ // grass grain and street grid
+ ctx.fillStyle='#3c5142';ctx.fillRect(0,0,world.w,world.h);
+ for(let x=0;x<world.w;x+=80)for(let y=0;y<world.h;y+=80){ctx.fillStyle=((x+y)/80%2===0)?'#ffffff04':'#00000005';ctx.fillRect(x,y,80,80)}
+ // broad streets
+ ctx.fillStyle='#626b68';ctx.fillRect(0,370,world.w,70);ctx.fillRect(0,790,world.w,58);ctx.fillRect(350,0,48,world.h);ctx.fillRect(1030,0,52,world.h);ctx.fillRect(1390,0,45,world.h);
+ ctx.strokeStyle='#d4d2a866';ctx.lineWidth=2;ctx.setLineDash([18,18]);[405,819].forEach(y=>{ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(world.w,y);ctx.stroke()});[374,1056,1412].forEach(x=>{ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,world.h);ctx.stroke()});ctx.setLineDash([]);
+ // sidewalk edges
+ ctx.strokeStyle='#b6c0b055';ctx.lineWidth=3;ctx.strokeRect(0,0,world.w,world.h);
+ for(const o of walls){if(o.x+o.w<camera.x-40||o.y+o.h<camera.y-40||o.x>camera.x+W+40||o.y>camera.y+H+40)continue;drawBuilding(o);}
+ // Vegetação pré-calculada: evita sorteios e objetos novos a cada quadro.
+ for(const b of bushes){if(b.x<camera.x-25||b.y<camera.y-25||b.x>camera.x+W+25||b.y>camera.y+H+25)continue;ctx.fillStyle=b.color;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill()}
+ for(const b of bullets){ctx.strokeStyle='#ffe27a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-b.vx*.025,b.y-b.vy*.025);ctx.stroke()}
+ for(const b of enemyBullets){ctx.fillStyle='#ff6c59';ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill()}
+ for(const e of enemies)if(e.alive){drawPerson(e.x,e.y,e.angle,'#e45e50',false,e.flash>0);ctx.fillStyle='#251e1e';ctx.fillRect(e.x-13,e.y-22,26,4);ctx.fillStyle='#f77';ctx.fillRect(e.x-13,e.y-22,26*(e.hp/2),4)}
+ drawPerson(player.x,player.y,player.angle,'#e5e9dd',true);
+ for(const p of particles){ctx.globalAlpha=clamp(p.life*4,0,1);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
+ ctx.restore();
+ // Damage overlay
+ if(damageFlash>0){ctx.fillStyle=`rgba(255,35,35,${damageFlash*1.8})`;ctx.fillRect(0,0,W,H)}
+ // subtle crosshair at aim point
+ if(aimPointer&&running){ctx.strokeStyle='#fff8';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(aimPointer.x,aimPointer.y,10,0,Math.PI*2);ctx.moveTo(aimPointer.x-15,aimPointer.y);ctx.lineTo(aimPointer.x-5,aimPointer.y);ctx.moveTo(aimPointer.x+5,aimPointer.y);ctx.lineTo(aimPointer.x+15,aimPointer.y);ctx.moveTo(aimPointer.x,aimPointer.y-15);ctx.lineTo(aimPointer.x,aimPointer.y-5);ctx.moveTo(aimPointer.x,aimPointer.y+5);ctx.lineTo(aimPointer.x,aimPointer.y+15);ctx.stroke()}
+}
+function loop(t){
+ const dt=Math.min((t-last)/1000||0,.035);last=t;update(dt);render();
+ fpsFrames++;fpsTime+=dt;
+ if(fpsTime>=.5){currentFps=Math.round(fpsFrames/fpsTime);fpsFrames=0;fpsTime=0;const el=document.getElementById('fps');if(el)el.textContent='FPS: '+currentFps}
+ requestAnimationFrame(loop)
+}
+requestAnimationFrame(loop);
+function showEnd(win){screen.style.display='flex';screen.querySelector('.card').innerHTML=`<h1>${win?'MISSÃO CONCLUÍDA!':'VOCÊ FOI ATINGIDO'}</h1><p>Você fez <b>${score}</b> pontos e chegou à missão <b>${mission}</b>.</p><p>Use os prédios, casas e barreiras como cobertura. Tente novamente e avance mais longe!</p><button class="action" id="again">JOGAR NOVAMENTE</button><p class="small">Operação Zona Urbana</p>`;document.getElementById('again').addEventListener('click',reset)}
+startBtn.addEventListener('click',reset);
+document.getElementById('reload').addEventListener('click',()=>{if(!running){reset();return}player.hp=Math.min(100,player.hp+5);updateHud()});
+function joySet(e){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,max=r.width*.32,l=Math.hypot(dx,dy),s=l>max?max/l:1;joyVec={x:dx*s/max,y:dy*s/max};nub.style.transform=`translate(${joyVec.x*max}px,${joyVec.y*max}px)`}
+joy.addEventListener('pointerdown',e=>{joyPointer=e.pointerId;joy.setPointerCapture(e.pointerId);joySet(e)});
+joy.addEventListener('pointermove',e=>{if(e.pointerId===joyPointer)joySet(e)});
+function joyEnd(e){if(e.pointerId===joyPointer){joyPointer=null;joyVec={x:0,y:0};nub.style.transform='translate(0,0)'}}
+joy.addEventListener('pointerup',joyEnd);joy.addEventListener('pointercancel',joyEnd);
+fireBtn.addEventListener('pointerdown',e=>{e.preventDefault();fireHeld=true;fireBtn.setPointerCapture(e.pointerId);shootPlayer()});
+function fireEnd(){fireHeld=false}fireBtn.addEventListener('pointerup',fireEnd);fireBtn.addEventListener('pointercancel',fireEnd);fireBtn.addEventListener('lostpointercapture',fireEnd);
+canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;const r=canvas.getBoundingClientRect();aimPointer={x:e.clientX-r.left,y:e.clientY-r.top};if(e.pointerType==='mouse'&&e.buttons===1)shootPlayer()});
+canvas.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&e.buttons===1){const r=canvas.getBoundingClientRect();aimPointer={x:e.clientX-r.left,y:e.clientY-r.top};shootPlayer()}});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+window.addEventListener('keydown',e=>{if(e.key===' '){fireHeld=true;e.preventDefault()}if(e.key==='ArrowUp'||e.key==='w'||e.key==='W')joyVec.y=-1;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')joyVec.y=1;if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A')joyVec.x=-1;if(e.key==='ArrowRight'||e.key==='d'||e.key==='D')joyVec.x=1});
+window.addEventListener('keyup',e=>{if(e.key===' ')fireHeld=false;if(['ArrowUp','ArrowDown','w','W','s','S'].includes(e.key))joyVec.y=0;if(['ArrowLeft','ArrowRight','a','A','d','D'].includes(e.key))joyVec.x=0});
+})();
+</script>
+</body>
+</html>
